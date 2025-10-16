@@ -1,0 +1,400 @@
+🎯 Objetivo
+Desenvolver o frontend completo de um SaaS multi-tenant para análise sociométrica e formação de equipes, usando Vite + React + TypeScript + Tailwind CSS + shadcn/ui. Backend será integrado posteriormente com Supabase.
+
+📦 Stack e Setup Inicial
+bash# Criar projeto
+npm create vite@latest socioteams -- --template react-ts
+cd socioteams
+npm install
+
+# Dependências essenciais
+npm install react-router-dom react-hook-form zod @hookform/resolvers
+npm install i18next react-i18next i18next-browser-languagedetector
+npm install recharts react-force-graph-2d papaparse
+npm install @dnd-kit/core @dnd-kit/sortable
+npm install lucide-react clsx tailwind-merge date-fns
+
+# shadcn/ui
+npx shadcn-ui@latest init
+npx shadcn-ui@latest add button input select table card dialog tabs dropdown-menu toast badge progress skeleton
+```
+
+---
+
+## 🏗️ Estrutura de Pastas
+```
+src/
+├── pages/
+│   ├── Dashboard.tsx
+│   ├── Employees.tsx
+│   ├── SurveyBuilder.tsx
+│   ├── SurveyDistribution.tsx
+│   ├── SurveyPublic.tsx (rota pública)
+│   ├── SociometricGraph.tsx
+│   ├── TeamBuilder.tsx
+│   └── Reports.tsx
+├── components/
+│   ├── ui/ (shadcn)
+│   ├── Layout.tsx
+│   ├── Navbar.tsx
+│   ├── Sidebar.tsx
+│   ├── LanguageSelector.tsx
+│   └── MetricCard.tsx
+├── lib/
+│   ├── i18n.ts
+│   └── mockData.ts (dados fake para desenvolvimento)
+├── locales/
+│   ├── pt.json
+│   ├── es.json
+│   └── en.json
+├── types/
+│   └── index.ts
+└── App.tsx
+
+🌍 Internacionalização (CRÍTICO)
+lib/i18n.ts
+typescriptimport i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+import pt from '../locales/pt.json';
+import es from '../locales/es.json';
+import en from '../locales/en.json';
+
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources: {
+      pt: { translation: pt },
+      es: { translation: es },
+      en: { translation: en }
+    },
+    fallbackLng: 'en',
+    lng: 'pt',
+    interpolation: { escapeValue: false }
+  });
+
+export default i18n;
+Estrutura dos JSONs de Tradução
+json{
+  "nav": {
+    "dashboard": "Dashboard / Panel / Painel",
+    "employees": "Employees / Empleados / Funcionários",
+    "surveys": "Surveys / Encuestas / Questionários",
+    "teams": "Teams / Equipos / Equipes",
+    "reports": "Reports / Informes / Relatórios"
+  },
+  "survey": {
+    "question1": "Who would you most like to work with?",
+    "question2": "Who would you prefer not to work with?",
+    "selectUpTo": "Select up to {{count}} people",
+    "submit": "Submit Responses",
+    "thankYou": "Thank you for responding!",
+    "alreadyAnswered": "You have already answered this survey",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link copied!"
+  },
+  "employees": {
+    "add": "Add Employee",
+    "import": "Import CSV",
+    "name": "Name",
+    "email": "Email",
+    "department": "Department",
+    "position": "Position"
+  }
+}
+
+📄 Páginas Principais (Com Mock Data)
+1. Dashboard.tsx
+typescript// Métricas em cards:
+// - Total de Funcionários: 150
+// - Taxa de Resposta: 73%
+// - Equipes Formadas: 12
+// - Índice de Coesão: 8.2/10
+
+// Gráficos com Recharts:
+// - LineChart: Evolução de respostas (últimos 30 dias)
+// - BarChart: Respostas por departamento
+// - PieChart: Distribuição de escolhas (positivas vs negativas)
+
+// Usar dados mock de mockData.ts
+2. Employees.tsx
+typescript// Tabela com shadcn Table:
+// Colunas: Nome | Email | Depto | Cargo | Status | Ações
+// Features:
+// - Search bar (filtro client-side)
+// - Botão "Adicionar Funcionário" (abre Dialog)
+// - Botão "Importar CSV" (upload + preview)
+// - Ações: Editar (Dialog) | Excluir (confirmação)
+// - Paginação (10 por página)
+
+// Mock: 50 funcionários fake
+3. SurveyBuilder.tsx
+typescript// Criar questionário:
+// - Input: Nome do questionário
+// - Perguntas padrão (editáveis):
+//   1. "Com quem você mais gostaria de trabalhar?" (múltipla escolha, até 5)
+//   2. "Com quem preferiria não trabalhar?" (múltipla escolha, até 3)
+//   3. "Quem é referência técnica?" (múltipla escolha, até 3)
+// - Botão: Adicionar pergunta customizada
+// - Preview do questionário
+// - Salvar (toast de sucesso)
+4. SurveyDistribution.tsx (IMPORTANTE)
+typescript// Interface de distribuição:
+// 1. Select multiple de funcionários (com search)
+// 2. Botão "Gerar Links Únicos"
+// 3. Tabela de links gerados:
+//    Colunas: Nome | Status | Link Único | Ações
+//    Status: Badge (Pendente/Respondido)
+//    Link: https://app.com/survey/abc123def (único por pessoa)
+//    Ações: 
+//      - Botão "Copiar Link" (ícone 📋, toast "Link copiado!")
+//      - Ícone ✉️ (apenas visual)
+//      - Ícone 📱 (apenas visual)
+// 4. Progress bar: "23/50 respostas (46%)"
+// 5. Filtros: Todos | Pendentes | Respondidos
+
+// Mock: gerar tokens aleatórios (crypto.randomUUID())
+// Salvar estado no localStorage para simular persistência
+5. SurveyPublic.tsx (Rota /survey/:token)
+typescript// Página pública (sem navbar/sidebar):
+// - LanguageSelector no topo direito
+// - Logo/título do questionário
+// - Instruções traduzidas
+// - Para cada pergunta:
+//   - Título da pergunta
+//   - Grid de cards com foto + nome dos colegas
+//   - Checkbox/radio para seleção
+//   - Contador: "Selecionados: 2/5"
+// - Botão "Enviar Respostas" (desabilitado se incompleto)
+// - Validação: token válido, não respondido
+// - Tela de sucesso após envio
+// - Mobile-first, cards responsivos
+
+// Mock: validar token contra localStorage
+6. SociometricGraph.tsx
+typescript// Grafo de rede com react-force-graph-2d:
+// - Nós: círculos coloridos por departamento
+//   - Tamanho = número de escolhas recebidas
+//   - Label com nome
+// - Arestas: 
+//   - Verde (escolha positiva)
+//   - Vermelho (escolha negativa)
+//   - Espessura = intensidade
+// - Controles:
+//   - Slider: Força mínima (filtrar arestas fracas)
+//   - Dropdown: Filtrar por departamento
+//   - Toggle: Mostrar apenas positivas/negativas/todas
+// - Sidebar com métricas:
+//   - Estrelas (top 5 mais escolhidos)
+//   - Isolados (menos escolhidos)
+//   - Conflitos (escolhas negativas mútuas)
+
+// Mock: 30-40 nós, relacionamentos aleatórios
+7. TeamBuilder.tsx
+typescript// Layout dividido (dnd-kit):
+// Esquerda: Pool de funcionários disponíveis (cards arrastáveis)
+// Direita: 3 áreas de "Equipe 1, 2, 3" (drop zones)
+// 
+// Features:
+// - Drag and drop de cards
+// - Card mostra: foto, nome, cargo
+// - Cada equipe mostra:
+//   - Nome editável
+//   - Membros (lista)
+//   - Score de coesão (gauge 0-10)
+//   - Alertas de conflito (ícone ⚠️ se houver escolha negativa)
+// - Botão "Sugerir Equipes" (gera 3 sugestões automáticas)
+// - Botão "Salvar Equipes"
+
+// Mock: algoritmo simples de sugestão (aleatório com preferência)
+8. Reports.tsx
+typescript// Gerador de relatórios:
+// 1. Dropdown: Tipo de relatório
+//    - Análise Sociométrica Completa
+//    - Relatório de Equipe
+//    - Análise de Conflitos
+// 2. Filtros: Data, Departamento
+// 3. Botão "Gerar Preview"
+// 4. Área de preview (cards + gráficos resumidos)
+// 5. Botão "Exportar PDF" (html2canvas + jspdf)
+// 
+// Preview deve incluir:
+// - Header com logo e título
+// - Métricas principais
+// - Gráfico sociométrico (imagem)
+// - Tabela de dados
+// - Recomendações (texto)
+
+🎨 Layout e Componentes Compartilhados
+Layout.tsx
+typescript// Container principal:
+// - Navbar fixo no topo (Navbar.tsx)
+// - Sidebar colapsável (Sidebar.tsx)
+// - Main content area com padding
+// - Responsivo: sidebar vira drawer em mobile
+Navbar.tsx
+typescript// Elementos:
+// - Logo (esquerda)
+// - Título da página atual (centro)
+// - LanguageSelector (direita)
+// - User dropdown: Nome, Perfil, Sair (direita)
+// - Botão hambúrguer (mobile, toggle sidebar)
+LanguageSelector.tsx
+typescript// Dropdown com flags:
+// 🇧🇷 Português
+// 🇪🇸 Español  
+// 🇬🇧 English
+// 
+// onChange: i18n.changeLanguage(lang)
+// Salvar preferência: localStorage.setItem('language', lang)
+MetricCard.tsx
+typescript// Props: title, value, icon, trend (up/down), color
+// Card shadcn com:
+// - Ícone (Lucide React)
+// - Valor grande
+// - Título pequeno
+// - Badge de tendência opcional
+
+📊 Mock Data (lib/mockData.ts)
+typescriptexport const mockEmployees = [
+  { id: 1, name: "João Silva", email: "joao@empresa.com", department: "TI", position: "Dev" },
+  // ... 50 funcionários
+];
+
+export const mockSurveyResponses = [
+  { 
+    employeeId: 1, 
+    positiveChoices: [2, 5, 8], 
+    negativeChoices: [15],
+    timestamp: "2025-10-10"
+  },
+  // ... respostas
+];
+
+export const mockTeams = [
+  { id: 1, name: "Equipe Alpha", members: [1, 2, 3, 5], cohesion: 8.5 },
+  // ... equipes
+];
+
+// Função para gerar grafo sociométrico mock
+export const generateSociometricData = () => {
+  // retorna nodes e links para react-force-graph
+};
+
+🎨 Design System (Tailwind Config)
+javascript// tailwind.config.js
+theme: {
+  extend: {
+    colors: {
+      primary: '#2563eb',
+      secondary: '#16a34a',
+      danger: '#dc2626',
+      warning: '#f59e0b',
+    }
+  }
+}
+Princípios de design:
+
+Cards com shadow-sm e rounded-lg
+Espaçamento consistente (p-4, p-6, gap-4)
+Hover states em botões/links
+Skeleton loaders onde necessário
+Toast notifications (shadcn)
+Mobile-first (sempre testar em 375px)
+
+
+🔄 Rotas (React Router)
+typescript// App.tsx
+<BrowserRouter>
+  <Routes>
+    <Route element={<Layout />}>
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/employees" element={<Employees />} />
+      <Route path="/surveys/builder" element={<SurveyBuilder />} />
+      <Route path="/surveys/distribute" element={<SurveyDistribution />} />
+      <Route path="/sociometry" element={<SociometricGraph />} />
+      <Route path="/teams" element={<TeamBuilder />} />
+      <Route path="/reports" element={<Reports />} />
+    </Route>
+    
+    {/* Rota pública sem Layout */}
+    <Route path="/survey/:token" element={<SurveyPublic />} />
+  </Routes>
+</BrowserRouter>
+
+✅ Checklist de Desenvolvimento (Priorizado)
+Sprint 1 - Base (Dia 1)
+
+ Setup Vite + React + TS + Tailwind
+ Instalar dependências
+ Configurar i18n (3 idiomas)
+ Criar mockData.ts com dados fake
+ Layout base (Navbar + Sidebar)
+ LanguageSelector funcional
+ Rotas configuradas
+
+Sprint 2 - Páginas Core (Dia 2-3)
+
+ Dashboard com gráficos mock
+ Employees (CRUD com mock)
+ SurveyBuilder (formulário)
+ SurveyDistribution (sistema de links únicos)
+ SurveyPublic (responder questionário)
+
+Sprint 3 - Visualizações (Dia 4)
+
+ SociometricGraph (grafo interativo)
+ Análise de métricas sociométricas
+ TeamBuilder (drag-and-drop)
+ Algoritmo de sugestão de equipes
+
+Sprint 4 - Polimento (Dia 5)
+
+ Reports com preview
+ Exportar PDF básico
+ Estados de loading
+ Responsividade completa
+ Testes manuais
+ README com screenshots
+
+
+🎯 Funcionalidades Essenciais
+MUST HAVE:
+✅ Multi-idioma em todas as telas
+✅ Sistema de links únicos (geração + cópia)
+✅ Grafo sociométrico bonito e interativo
+✅ Drag-and-drop de equipes funcional
+✅ Interface moderna e responsiva
+NICE TO HAVE:
+
+Animações suaves (framer-motion)
+Dark mode toggle
+Exportação CSV
+Gráficos avançados
+
+
+💡 Dicas de Otimização de Créditos
+
+Use mock data extensivamente - não gaste tempo com backend agora
+Copie componentes shadcn - não reinvente a roda
+Foque no visual primeiro - funcionalidade complexa depois
+Teste incrementalmente - uma página de cada vez
+Use localStorage - simular persistência sem backend
+Priorize o caminho feliz - edge cases depois
+Screenshots no README - documentação visual
+
+
+📸 Resultado Esperado
+Ao final, você deve ter:
+
+✅ Aplicação navegável com todas as páginas
+✅ Dados mockados que parecem reais
+✅ Sistema de links funcionando (com localStorage)
+✅ Grafo sociométrico impressionante
+✅ Drag-and-drop de equipes suave
+✅ Troca de idioma funcionando perfeitamente
+✅ 100% responsivo (mobile + desktop)
+✅ README com instruções de uso
+
+Foco total no frontend. Backend (Supabase) será integrado na próxima fase.
