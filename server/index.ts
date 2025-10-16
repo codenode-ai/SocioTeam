@@ -1,5 +1,53 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
+import type { ListenOptions } from "net";
+
+const DEFAULT_PORT = 5000;
+
+function readPortFromCli(): number | undefined {
+  const args = process.argv.slice(2);
+
+  for (let index = 0; index < args.length; index++) {
+    const token = args[index];
+
+    if (token === "--") {
+      // npm forwards "--" to scripts; skip it.
+      continue;
+    }
+
+    if (token === "-p" || token === "--port") {
+      const next = args[index + 1];
+      if (next) {
+        const parsed = Number.parseInt(next, 10);
+        if (!Number.isNaN(parsed) && parsed > 0) {
+          return parsed;
+        }
+      }
+    }
+
+    const match = token.match(/^--port=(\d+)$/);
+    if (match) {
+      const parsed = Number.parseInt(match[1] ?? "", 10);
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+
+    if (!token.startsWith("-")) {
+      const parsed = Number.parseInt(token, 10);
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function readPortFromEnv(): number | undefined {
+  const candidate = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : NaN;
+  return !Number.isNaN(candidate) && candidate > 0 ? candidate : undefined;
+}
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
@@ -60,12 +108,17 @@ app.use((req, res, next) => {
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
+  const port = readPortFromCli() ?? readPortFromEnv() ?? DEFAULT_PORT;
+  const listenOptions: ListenOptions & { reusePort?: boolean } = {
     port,
     host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  };
+
+  if (process.platform !== "win32") {
+    listenOptions.reusePort = true;
+  }
+
+  server.listen(listenOptions, () => {
     log(`serving on port ${port}`);
   });
 })();
