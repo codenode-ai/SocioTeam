@@ -15,6 +15,24 @@ const resources = {
         teams: "Team Builder",
         reports: "Reports"
       },
+      auth: {
+        loginTitle: "Access your account",
+        loginSubtitle: "Sign in to manage sociometric insights.",
+        registerTitle: "Create your account",
+        registerSubtitle: "Start building sociometric intelligence.",
+        username: "Username",
+        password: "Password",
+        confirmPassword: "Confirm password",
+        submitLogin: "Sign in",
+        submitRegister: "Create account",
+        goToLogin: "Already have an account?",
+        goToRegister: "Need an account?",
+        welcomeBack: "Welcome back, {{username}}!",
+        accountCreated: "Account created successfully.",
+        logoutSucceeded: "You signed out successfully.",
+        unknownError: "Something went wrong. Try again.",
+        passwordMismatch: "Passwords must match."
+      },
       dashboard: {
         title: "Dashboard",
         totalEmployees: "Total Employees",
@@ -124,6 +142,24 @@ const resources = {
         teams: "Montar Equipes",
         reports: "Relatórios"
       },
+      auth: {
+        loginTitle: "Entre na sua conta",
+        loginSubtitle: "Acesse os insights sociometricos.",
+        registerTitle: "Crie sua conta",
+        registerSubtitle: "Comece a construir inteligencia sociometrica.",
+        username: "Usuario",
+        password: "Senha",
+        confirmPassword: "Confirmar senha",
+        submitLogin: "Entrar",
+        submitRegister: "Cadastrar",
+        goToLogin: "Ja tem conta?",
+        goToRegister: "Precisa de conta?",
+        welcomeBack: "Bem vindo de volta, {{username}}!",
+        accountCreated: "Conta criada com sucesso.",
+        logoutSucceeded: "Voce saiu da conta.",
+        unknownError: "Algo deu errado. Tente novamente.",
+        passwordMismatch: "As senhas devem ser iguais."
+      },
       dashboard: {
         title: "Painel",
         totalEmployees: "Total de Funcionários",
@@ -232,6 +268,24 @@ const resources = {
         sociometry: "Grafo Sociométrico",
         teams: "Formar Equipos",
         reports: "Informes"
+      },
+      auth: {
+        loginTitle: "Inicia sesion",
+        loginSubtitle: "Accede a los datos sociometricos.",
+        registerTitle: "Crea tu cuenta",
+        registerSubtitle: "Comienza a construir inteligencia sociometrica.",
+        username: "Usuario",
+        password: "Contrasena",
+        confirmPassword: "Confirmar contrasena",
+        submitLogin: "Entrar",
+        submitRegister: "Crear cuenta",
+        goToLogin: "Ya tienes cuenta?",
+        goToRegister: "Necesitas cuenta?",
+        welcomeBack: "Bienvenido de nuevo, {{username}}!",
+        accountCreated: "Cuenta creada con exito.",
+        logoutSucceeded: "Cerraste sesion correctamente.",
+        unknownError: "Algo salio mal. Intentalo de nuevo.",
+        passwordMismatch: "Las contrasenas deben coincidir."
       },
       dashboard: {
         title: "Panel",

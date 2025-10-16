@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,6 +11,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import LanguageSelector from './LanguageSelector';
 import { Network, User, LogOut, Menu } from 'lucide-react';
+import { useCurrentUser, useLogout } from '@/hooks/use-auth';
+import { useToast } from '@/hooks/use-toast';
 
 interface NavbarProps {
   title: string;
@@ -18,6 +21,36 @@ interface NavbarProps {
 
 export default function Navbar({ title, onMenuClick }: NavbarProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const { user } = useCurrentUser();
+  const logoutMutation = useLogout();
+  const [, navigate] = useLocation();
+
+  const initials = user?.username
+    ? user.username.slice(0, 2).toUpperCase()
+    : 'ST';
+
+  const handleLogout = () => {
+    if (logoutMutation.isPending) {
+      return;
+    }
+
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast({ title: t('auth.logoutSucceeded') });
+        navigate('/login');
+      },
+      onError: (error) => {
+        const description =
+          error instanceof Error ? error.message : t('auth.unknownError');
+        toast({
+          variant: 'destructive',
+          title: t('auth.unknownError'),
+          description,
+        });
+      },
+    });
+  };
 
   return (
     <header className="h-16 border-b bg-card px-4 flex items-center justify-between gap-4 sticky top-0 z-10">
@@ -49,9 +82,9 @@ export default function Navbar({ title, onMenuClick }: NavbarProps) {
             <Button variant="ghost" className="gap-2" data-testid="button-user-menu">
               <Avatar className="w-8 h-8">
                 <AvatarImage src="" />
-                <AvatarFallback>AD</AvatarFallback>
+                <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
-              <span className="hidden sm:inline">Admin User</span>
+              <span className="hidden sm:inline">{user?.username}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -60,7 +93,13 @@ export default function Navbar({ title, onMenuClick }: NavbarProps) {
               Profile
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem data-testid="menu-item-logout">
+            <DropdownMenuItem
+              data-testid="menu-item-logout"
+              onSelect={(event) => {
+                event.preventDefault();
+                handleLogout();
+              }}
+            >
               <LogOut className="w-4 h-4 mr-2" />
               Logout
             </DropdownMenuItem>

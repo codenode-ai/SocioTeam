@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
+import session from "express-session";
 import type { ListenOptions } from "net";
+import { registerRoutes } from "./routes";
+import { setupVite, serveStatic, log } from "./vite";
 
 const DEFAULT_PORT = 5000;
 
@@ -48,11 +50,23 @@ function readPortFromEnv(): number | undefined {
   const candidate = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : NaN;
   return !Number.isNaN(candidate) && candidate > 0 ? candidate : undefined;
 }
-import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET ?? "socioteam-dev-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  }),
+);
 
 app.use((req, res, next) => {
   const start = Date.now();

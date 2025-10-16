@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -18,6 +18,9 @@ import SociometricGraph from '@/pages/SociometricGraph';
 import TeamBuilder from '@/pages/TeamBuilder';
 import Reports from '@/pages/Reports';
 import NotFound from "@/pages/not-found";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import { useCurrentUser } from "@/hooks/use-auth";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -51,37 +54,71 @@ function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
+  const { user, isLoading } = useCurrentUser();
+  const [location, navigate] = useLocation();
+  const redirectingRef = useRef(false);
+
+  useEffect(() => {
+    if (!isLoading && !user && !redirectingRef.current) {
+      redirectingRef.current = true;
+      const params = new URLSearchParams();
+      params.set("next", location);
+      navigate(`/login?${params.toString()}`);
+    }
+  }, [isLoading, user, location, navigate]);
+
+  if (isLoading || (!user && !redirectingRef.current)) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <span className="text-sm text-muted-foreground">
+          {t('common.loading')}
+        </span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return <Layout>{children}</Layout>;
+}
+
 function Router() {
   return (
     <Switch>
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
       <Route path="/survey/:token" component={SurveyPublic} />
       
       <Route path="/">
-        <Layout><Dashboard /></Layout>
+        <ProtectedLayout><Dashboard /></ProtectedLayout>
       </Route>
       
       <Route path="/employees">
-        <Layout><Employees /></Layout>
+        <ProtectedLayout><Employees /></ProtectedLayout>
       </Route>
       
       <Route path="/surveys/builder">
-        <Layout><SurveyBuilder /></Layout>
+        <ProtectedLayout><SurveyBuilder /></ProtectedLayout>
       </Route>
       
       <Route path="/surveys/distribute">
-        <Layout><SurveyDistribution /></Layout>
+        <ProtectedLayout><SurveyDistribution /></ProtectedLayout>
       </Route>
       
       <Route path="/sociometry">
-        <Layout><SociometricGraph /></Layout>
+        <ProtectedLayout><SociometricGraph /></ProtectedLayout>
       </Route>
       
       <Route path="/teams">
-        <Layout><TeamBuilder /></Layout>
+        <ProtectedLayout><TeamBuilder /></ProtectedLayout>
       </Route>
       
       <Route path="/reports">
-        <Layout><Reports /></Layout>
+        <ProtectedLayout><Reports /></ProtectedLayout>
       </Route>
       
       <Route component={NotFound} />
