@@ -20,7 +20,7 @@ import { mockEmployees } from '@/lib/mockData';
 import { Employee } from '@/types';
 
 interface TeamData {
-  id: number;
+  id: string;
   name: string;
   members: Employee[];
   cohesion: number;
@@ -30,9 +30,9 @@ export default function TeamBuilder() {
   const { t } = useTranslation();
   const [availableEmployees, setAvailableEmployees] = useState<Employee[]>(mockEmployees.slice(0, 20));
   const [teams, setTeams] = useState<TeamData[]>([
-    { id: 1, name: 'Team Alpha', members: [], cohesion: 0 },
-    { id: 2, name: 'Team Beta', members: [], cohesion: 0 },
-    { id: 3, name: 'Team Gamma', members: [], cohesion: 0 },
+    { id: '1', name: 'Team Alpha', members: [], cohesion: 0 },
+    { id: '2', name: 'Team Beta', members: [], cohesion: 0 },
+    { id: '3', name: 'Team Gamma', members: [], cohesion: 0 },
   ]);
   const [activeEmployee, setActiveEmployee] = useState<Employee | null>(null);
 
@@ -57,11 +57,10 @@ export default function TeamBuilder() {
 
     if (!over) return;
 
-    const employeeId = active.id as number;
-    const targetTeamId = over.id as number;
+    const employeeId = active.id as string;
+    const targetTeamId = over.id as string;
 
-    const sourceTeam = teams.find(t => t.members.some(m => m.id === employeeId));
-    const employee = sourceTeam?.members.find(m => m.id === employeeId) ||
+    const sourceTeam = teams.find(t => t.members.some(m => m.id === employeeId)) ||
       availableEmployees.find(e => e.id === employeeId);
 
     if (!employee) return;
@@ -152,7 +151,7 @@ export default function TeamBuilder() {
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
                   e.preventDefault();
-                  const employeeId = parseInt(e.dataTransfer.getData('employeeId'));
+                  const employeeId = e.dataTransfer.getData('employeeId');
                   const employee = availableEmployees.find(emp => emp.id === employeeId);
                   if (employee) {
                     setAvailableEmployees(availableEmployees.filter(e => e.id !== employeeId));

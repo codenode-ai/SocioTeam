@@ -12,10 +12,10 @@ import { mockEmployees, mockSurvey } from '@/lib/mockData';
 export default function SurveyPublic() {
   const { t } = useTranslation();
   const { token } = useParams();
-  const [responses, setResponses] = useState<Record<number, number[]>>({});
+  const [responses, setResponses] = useState<Record<string, string[]>>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const toggleSelection = (questionId: number, employeeId: number, maxChoices: number) => {
+  const toggleSelection = (questionId: string, employeeId: string, maxChoices: number) => {
     setResponses(prev => {
       const current = prev[questionId] || [];
       const isSelected = current.includes(employeeId);

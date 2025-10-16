@@ -25,7 +25,7 @@ import { mockEmployees } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 
 interface SurveyLinkData {
-  employeeId: number;
+  employeeId: string;
   token: string;
   status: 'pending' | 'completed';
 }

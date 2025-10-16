@@ -26,51 +26,59 @@ const lastNames = ['Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreir
 export const mockEmployees: Employee[] = Array.from({ length: 50 }, (_, i) => {
   const dept = departments[i % departments.length];
   return {
-    id: i + 1,
+    id: (i + 1).toString(),
     name: `${firstNames[i % firstNames.length]} ${lastNames[(i * 2) % lastNames.length]}`,
     email: `${firstNames[i % firstNames.length].toLowerCase()}.${lastNames[(i * 2) % lastNames.length].toLowerCase()}@socioteam.com`,
     department: dept,
     position: positions[dept as keyof typeof positions][i % positions[dept as keyof typeof positions].length],
     status: i % 10 === 0 ? 'inactive' : 'active',
-    avatar: avatars[i % avatars.length]
+    avatar: avatars[i % avatars.length],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 });
 
 export const mockSurvey: Survey = {
-  id: 1,
+  id: '1',
   name: 'Team Formation Survey 2025',
+  description: 'Survey to form teams for the next quarter',
   questions: [
-    { id: 1, text: 'Who would you most like to work with?', maxChoices: 5, type: 'positive' },
-    { id: 2, text: 'Who would you prefer not to work with?', maxChoices: 3, type: 'negative' },
-    { id: 3, text: 'Who is a technical reference?', maxChoices: 3, type: 'neutral' }
+    { id: '1', surveyId: '1', text: 'Who would you most like to work with?', maxChoices: 5, type: 'positive', order: 0 },
+    { id: '2', surveyId: '1', text: 'Who would you prefer not to work with?', maxChoices: 3, type: 'negative', order: 1 },
+    { id: '3', surveyId: '1', text: 'Who is a technical reference?', maxChoices: 3, type: 'neutral', order: 2 }
   ],
-  createdAt: new Date().toISOString()
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  createdBy: '1',
+  status: 'active'
 };
 
 export const mockSurveyResponses: SurveyResponse[] = mockEmployees.slice(0, 35).map((emp, idx) => ({
+  id: crypto.randomUUID(),
   employeeId: emp.id,
-  surveyId: 1,
+  surveyId: '1',
   responses: [
     {
-      questionId: 1,
-      choices: Array.from({ length: 3 + (idx % 3) }, (_, i) => ((emp.id + i + 1) % 50) + 1)
+      questionId: '1',
+      choices: Array.from({ length: 3 + (idx % 3) }, (_, i) => ((parseInt(emp.id) + i + 1) % 50).toString())
     },
     {
-      questionId: 2,
-      choices: Array.from({ length: 1 + (idx % 2) }, (_, i) => ((emp.id + i + 10) % 50) + 1)
+      questionId: '2',
+      choices: Array.from({ length: 1 + (idx % 2) }, (_, i) => ((parseInt(emp.id) + i + 10) % 50).toString())
     },
     {
-      questionId: 3,
-      choices: Array.from({ length: 2 + (idx % 2) }, (_, i) => ((emp.id + i + 5) % 50) + 1)
+      questionId: '3',
+      choices: Array.from({ length: 2 + (idx % 2) }, (_, i) => ((parseInt(emp.id) + i + 5) % 50).toString())
     }
   ],
-  timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+  createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+  updatedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
 }));
 
 export const mockTeams: Team[] = [
-  { id: 1, name: 'Team Alpha', members: [1, 5, 8, 12, 15], cohesion: 8.5 },
-  { id: 2, name: 'Team Beta', members: [2, 6, 9, 13, 16], cohesion: 7.2 },
-  { id: 3, name: 'Team Gamma', members: [3, 7, 10, 14, 17], cohesion: 9.1 }
+  { id: '1', name: 'Team Alpha', description: 'Development team', members: ['1', '5', '8', '12', '15'], cohesion: 8.5, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), createdBy: '1' },
+  { id: '2', name: 'Team Beta', description: 'Marketing team', members: ['2', '6', '9', '13', '16'], cohesion: 7.2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), createdBy: '1' },
+  { id: '3', name: 'Team Gamma', description: 'Operations team', members: ['3', '7', '10', '14', '17'], cohesion: 9.1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), createdBy: '1' }
 ];
 
 export function generateSociometricData(): SociometricData {
@@ -91,7 +99,8 @@ export function generateSociometricData(): SociometricData {
   const links = [];
   for (const response of mockSurveyResponses) {
     for (const choice of response.responses[0]?.choices || []) {
-      if (choice <= 35) {
+      const targetEmployee = mockEmployees.find(emp => emp.id === choice);
+      if (targetEmployee) {
         links.push({
           source: response.employeeId,
           target: choice,
@@ -101,7 +110,8 @@ export function generateSociometricData(): SociometricData {
       }
     }
     for (const choice of response.responses[1]?.choices || []) {
-      if (choice <= 35 && Math.random() > 0.7) {
+      const targetEmployee = mockEmployees.find(emp => emp.id === choice);
+      if (targetEmployee && Math.random() > 0.7) {
         links.push({
           source: response.employeeId,
           target: choice,
