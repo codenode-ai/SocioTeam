@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nextProvider, useTranslation } from 'react-i18next';
 import i18n from '@/lib/i18n';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { ThemeProvider } from 'next-themes';
 import AppSidebar from '@/components/AppSidebar';
 import Navbar from '@/components/Navbar';
 import Dashboard from '@/pages/Dashboard';
@@ -132,14 +133,16 @@ function App() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <I18nextProvider i18n={i18n}>
-        <TooltipProvider>
-          <Router />
-          <Toaster />
-        </TooltipProvider>
-      </I18nextProvider>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <QueryClientProvider client={queryClient}>
+        <I18nextProvider i18n={i18n}>
+          <TooltipProvider>
+            <Router />
+            <Toaster />
+          </TooltipProvider>
+        </I18nextProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

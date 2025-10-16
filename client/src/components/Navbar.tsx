@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import LanguageSelector from './LanguageSelector';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Network, User, LogOut, Menu } from 'lucide-react';
 import { useCurrentUser, useLogout } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -76,6 +77,7 @@ export default function Navbar({ title, onMenuClick }: NavbarProps) {
 
       <div className="flex items-center gap-2">
         <LanguageSelector />
+        <ThemeToggle />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
